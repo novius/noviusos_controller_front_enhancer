@@ -390,6 +390,7 @@ class Controller_Front_Application_Enhancer extends \Nos\Controller_Front_Applic
         $field_name    = null;
         $find          = "$model::query";
         $isContextable = $model::behaviours('Nos\Orm_Behaviour_Twinnable');
+        $context       = $this->main_controller->getContext();
         if (!is_callable($find)) {
             throw new \Exception("Model must have a query method");
         }
@@ -400,19 +401,25 @@ class Controller_Front_Application_Enhancer extends \Nos\Controller_Front_Applic
         if (empty($field_name)) {
             return null;
         }
-        $query = call_user_func($find);
-        if (get_class($query) != 'Nos\Orm\Query') {
-            throw new \Exception("Query method must return a Nos\Orm\Query");
-        }
 
         $where = array(
             array($field_name, $value),
         );
-        if ($isContextable) {
-            $where[] = array($isContextable['context_property'], $this->main_controller->getPage()->page_context);
-        }
 
-        return $query->where($where)->get_one();
+        if (\Arr::get($params, 'twinnable', false)) {
+            $items = $model::findContextOrMain($context, compact('where'));
+            return reset($items);
+        } else {
+            if ($isContextable) {
+                $where[] = array($isContextable['context_property'], $context);
+            }
+
+            $query = call_user_func($find);
+            if (!($query instanceof \Nos\Orm\Query)) {
+                throw new \Exception("Query method must return a Nos\Orm\Query");
+            }
+            return $query->where($where)->get_one();
+        }
     }
 
     protected static function callback($cb, $params)

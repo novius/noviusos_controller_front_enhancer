@@ -161,6 +161,10 @@ The key 'field' contain the mysql column which will be used to retrieve the mode
 
 It's optionnal for models with VirtualPath or VirtualName behaviour.
 
+##### twinnable
+
+When the key 'twinnable' is set and true, the findCOntextOrMain method will be used to find the item instead of a basic context filter.
+
 ### Accessing parameters
 
 To access parameters from within an action, call the method routeParam().
