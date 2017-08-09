@@ -2,6 +2,8 @@
 
 namespace Enhancer;
 
+use Nos\Tools_Context;
+
 class Controller_Front_Application_Enhancer extends \Nos\Controller_Front_Application
 {
     protected static $_routes = array();
@@ -407,9 +409,25 @@ class Controller_Front_Application_Enhancer extends \Nos\Controller_Front_Applic
         );
 
         if (\Arr::get($params, 'twinnable', false)) {
+
             $items = $model::findContextOrMain($context, compact('where'));
-            return reset($items);
+            if (empty($items)) {
+                return null;
+            }
+            $item = reset($items);
+
+            // To prevent duplicate content, if the item is not in the current context and an item exists for
+            // the current context, then redirect to the last one
+            if ($item->get_context() !== $context) {
+                $otherItem = $item->find_context($context);
+                if (!empty($otherItem)) {
+                    \Response::redirect($otherItem->url());
+                }
+            }
+
+            return $item;
         } else {
+
             if ($isContextable) {
                 $where[] = array($isContextable['context_property'], $context);
             }
