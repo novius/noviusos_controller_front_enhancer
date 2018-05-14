@@ -556,7 +556,7 @@ class Controller_Front_Application_Enhancer extends \Nos\Controller_Front_Applic
         $controllerHelper = new Helper_Controller();
         $currentClass     = $controllerHelper->getEnhancers(get_called_class());
         $enhancerName     = current(array_keys($currentClass));
-        $segments         = $routeHelper->getConfigurationSegments($route, $enhancerName);
+        $segments         = $routeHelper->getConfigurationSegments($route, $enhancerName, static::$_cachedContext);
         if (!empty($segments)) {
             return array_filter($segments);
         }
